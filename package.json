@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "benchmark": "^2.1.4",
-    "lodash": "^4.17.4"
+    "glob": "^7.1.2",
+    "lodash": "^4.17.4",
+    "yargs": "^8.0.2"
   }
 }
