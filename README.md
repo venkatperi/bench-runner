@@ -2,12 +2,32 @@
 
 [benchmark.js](http://www.benchmarkjs.com) runner for Node.js like [mocha](http://mochajs.org/).
 
-### Installation
+### Getting Started
 
 ```
-$ npm i bench-runner -g
+$ npm install bench-runner -g
+$ mkdir benches
+$ $EDITOR benches/string.js #open with your favorite editor
+```
+In your editor:
+
+```javascript
+suite( 'find in string', () => {
+  bench( 'RegExp#test', () => /o/.test( 'Hello World!' ) );
+  bench( 'String#indexOf', () => 'Hello World!'.indexOf( 'o' ) > -1 );
+  bench( 'String#match', () => !!'Hello World!'.match( /o/ ) );
+} );
 ```
 
+Back in the terminal:
+```
+$ bench-runner -f fastest
+[find in string]
+  RegExp#test x 11,841,755 ops/sec ±3.00% (89 runs sampled)
+  String#indexOf x 30,491,086 ops/sec ±0.45% (92 runs sampled)
+  String#match x 8,287,739 ops/sec ±2.57% (88 runs sampled)
+fastest: String#indexOf
+```
 ### Usage
 
 Run `bench-runner` from the command line. By default, `bench-runner` looks for `*.js` files under the `benches/` subdirectory.
@@ -37,26 +57,7 @@ Options:
   -r, --recursive                                     [boolean] [default: false]
 ```
 
-### Examples
-
-#### Hello World 
-Declare a suite and add benchmarks to it:
-
-```javascript
-suite( 'find in string', () => {
-  bench( 'RegExp#test', () => /o/.test( 'Hello World!' ) );
-  bench( 'String#indexOf', () => 'Hello World!'.indexOf( 'o' ) > -1 );
-  bench( 'String#match', () => !!'Hello World!'.match( /o/ ) );
-} );
-```
-Output:
-```
-[find in string]
-  RegExp#test x 11,841,755 ops/sec ±3.00% (89 runs sampled)
-  String#indexOf x 30,491,086 ops/sec ±0.45% (92 runs sampled)
-  String#match x 8,287,739 ops/sec ±2.57% (88 runs sampled)
-```
-#### Nested Benchmarks 
+### Nested Benchmarks 
 Suites can be nested:
 
 ```javascript
@@ -86,7 +87,7 @@ $bench-runner -g classes -f fastest
   fastest: es5
 ```
 
-##### Deferred benchmarks 
+#### Benchmarking Asynchronous Functions
 To defer a benchmark, pass an callback argument to the benchmark function. The callback
 must be called to end the benchmark.
 
@@ -103,10 +104,34 @@ Output:
 
 #### Hooks 
 
-* `before()` Called before any benchmarks/suites within a suite
-* `after()` Called after all benchmarks/suites within a suite
-* `beforeEach()` Called before each benchmark in a suite 
-* `afterEach()` Called after each benchmark in a suite 
+* `before` Called before any benchmarks/suites within a suite
+* `after` Called after all benchmarks/suites within a suite
+* `beforeEach` Called before *each cycle* of each benchmark in a suite 
+* `afterEach` Called after *each cycle* of each benchmark in a suite 
 
+Hooks must be synchronous since they are called by `benchmark.js` which does not support async hooks at this time.
+
+```javascript
+suite('hooks', function() {
+
+  before(function() {
+    // runs before all tests in this suite
+  });
+
+  after(function() {
+    // runs after all tests in this suite
+  });
+
+  beforeEach(function() {
+    // runs before each cycle of each benchmark in this suite
+  });
+
+  afterEach(function() {
+    // runs after each cycle of each benchmark in this suite
+  });
+
+  //benchmarks here...
+});
+```
 
 
