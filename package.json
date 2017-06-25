@@ -1,7 +1,7 @@
 {
   "name": "bench-runner",
   "preferGlobal": true,
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "benchmark.js runner like mocha",
   "bin": "./bin/bench-runner",
   "scripts": {
