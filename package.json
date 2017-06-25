@@ -1,13 +1,20 @@
 {
   "name": "bench-runner",
+  "preferGlobal": true,
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "benchmark.js runner like mocha",
+  "bin": "./bin/bench-runner",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Venkat Peri<venkatperi@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "benchmark",
+    "runner",
+    "testing"
+  ],
+  "repository": "https://github.com/venkatperi/bench-runner",
   "dependencies": {
     "benchmark": "^2.1.4",
     "glob": "^7.1.2",
