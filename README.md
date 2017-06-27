@@ -104,12 +104,10 @@ Output:
 
 #### Hooks 
 
-* `before` Called before any benchmarks/suites within a suite
-* `after` Called after all benchmarks/suites within a suite
-* `beforeEach` Called before *each cycle* of each benchmark in a suite 
-* `afterEach` Called after *each cycle* of each benchmark in a suite 
-
-Hooks must be synchronous since they are called by `benchmark.js` which does not support async hooks at this time.
+Hooks must be synchronous since they are called by `benchmark.js` which does not 
+support async hooks at this time. Also, `setup` and`teardown` are compiled into the test function. 
+Including either may place restrictions on the scoping/availability of variables in the test function 
+(see `benchmark.js` docs for more information).
 
 ```javascript
 suite('hooks', function() {
@@ -123,12 +121,20 @@ suite('hooks', function() {
   });
 
   beforeEach(function() {
-    // runs before each cycle of each benchmark in this suite
+    // runs before each benchmark test function in this suite
   });
 
   afterEach(function() {
-    // runs after each cycle of each benchmark in this suite
+    // runs after each benchmark test function in this suite
   });
+  
+  bench('name', {setup: function(){
+    //setup is compiled into the test function and runs before each cycle of the test 
+  }})
+ 
+  bench('name', {teardown: function(){
+    //teardown is compiled into the test function and runs after each cycle of the test 
+  }}, testFn)
 
   //benchmarks here...
 });
