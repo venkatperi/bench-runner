@@ -11,7 +11,7 @@ ifdef::env-github,env-browser[:outfilesuffix: .adoc]
 :warning-caption: :warning:
 endif::[]
 
-= benchr
+= bench-runner
 
 TIP: http://www.benchmarkjs.com[benchmark.js] runner for Node.js like
 http://mochajs.org/[mocha].
