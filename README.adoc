@@ -1,0 +1,272 @@
+ifdef::env-github,env-browser[:outfilesuffix: .adoc]
+:rootdir: .
+:imagesdir: {rootdir}/images
+:toclevels: 2
+:toc:
+:numbered:
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+= benchr
+
+http://www.benchmarkjs.com[benchmark.js] runner for Node.js like
+http://mochajs.org/[mocha].
+
+== Getting Started
+
+Install with `npm`:
+
+[source, bash]
+$ npm install bench-runner -g
+$ mkdir benches
+$ $EDITOR benches/string.js #open with your favorite editor
+
+In your editor:
+
+[source,javascript]
+suite( 'find in string', () => {
+  bench( 'RegExp#test', () => /o/.test( 'Hello World!' ) );
+  bench( 'String#indexOf', () => 'Hello World!'.indexOf( 'o' ) > -1 );
+  bench( 'String#match', () => !!'Hello World!'.match( /o/ ) );
+} );
+
+Back in the terminal:
+
+[source,bash]
+$ bench-runner -f fastest
+[find in string]
+  RegExp#test x 11,841,755 ops/sec ±3.00% (89 runs sampled)
+  String#indexOf x 30,491,086 ops/sec ±0.45% (92 runs sampled)
+  String#match x 8,287,739 ops/sec ±2.57% (88 runs sampled)
+fastest: String#indexOf
+
+
+== Suites & Benchmarks
+Group benchmarks in a suite:
+
+[source,javascript]
+----
+suite( 'group of tests', () => {
+  bench( 'a benchmark', ...);
+  bench( 'yet a benchmark', ...);
+} );
+----
+
+=== Paths
+Suites and benchmarks are assigned paths which are useful, for example, for filtering with the `grep`
+option. Paths are constructed by concatenating the names of suites and benchmarks leading to the
+target, separated with a colon `:`. In the above snippet, benchmark `a benchmark` has the
+path `:group of tests:a benchmark`
+
+=== Nested Suites & Benchmarks
+
+Suites can be nested:
+
+[source,javascript]
+----
+suite( 'es5 vs es6', () => {
+  suite( 'classes', () => {
+    function ES5() { this.foo = 'bar'; }
+    ES5.prototype.bar = function () { };
+
+    class ES6 {
+      constructor() { this.foo = 'bar'; }
+      bar() { }
+    }
+
+    bench( 'es5', () => new ES5());
+    bench( 'es6', () => new ES6());
+  } );
+
+  suite( 'arrow functions', () => {
+    var es5obj = {
+      value : 42,
+      fn : function () { return function () { return es5obj.value; }; }
+    };
+    var es5fn = es5obj.fn();
+
+    var es6obj = {
+      value : 42,
+      fn : function () { return () => this.value; }
+    };
+    var es6fn = es6obj.fn();
+
+    bench( 'es5', es5fn );
+    bench( 'es6', es6fn );
+  } );
+} );
+----
+
+Output:
+
+[source,bash]
+----
+$ bench-runner -g es5
+[es5 vs es6]
+  [arrow functions]
+    es5 x 79,383,329 ops/sec ±0.95% (89 runs sampled)
+    es6 x 80,249,618 ops/sec ±1.21% (83 runs sampled)
+  [classes]
+    es5 x 70,144,602 ops/sec ±0.41% (91 runs sampled)
+    es6 x 36,864,672 ops/sec ±1.27% (87 runs sampled)
+----
+
+=== Benchmarking Asynchronous Functions
+
+To defer a benchmark, pass an callback argument to the benchmark
+function. The callback must be called to end the benchmark.
+
+[source,javascript]
+----
+suite('deferred', () => {
+  bench('timeout', (done) => setTimeout(done, 100));
+});
+----
+
+Output:
+
+[source,bash]
+....
+[deferred]
+  timeout x 9.72 ops/sec ±0.41% (49 runs sampled)
+....
+
+=== Dynamically Generating Benchmarks
+Use javascript to generate benchmarks or suites dynamically:
+
+[source,javascript]
+----
+suite( 'buffer allocation', () => {
+  for ( let size = minSize; size <= maxSize; size *= 2 ) {
+    bench( size, () => Buffer.allocUnsafe( size ) );
+  }
+} )
+----
+
+The above code will produce a suite with multiple benchmarks:
+
+[source,bash]
+----
+[buffer allocation]
+  1024 x 2,958,389 ops/sec ±2.85% (81 runs sampled)
+  2048 x 1,138,591 ops/sec ±2.42% (52 runs sampled)
+  4096 x 462,223 ops/sec ±2.48% (54 runs sampled)
+  8192 x 324,956 ops/sec ±1.56% (44 runs sampled)
+  16384 x 199,686 ops/sec ±0.94% (80 runs sampled)
+----
+
+== Usage
+
+Run `bench-runner` from the command line. By default, `bench-runner`
+looks for `*.js` files under the `benches/` subdirectory.
+
+[source,bash]
+----
+$ bench-runner [options] [files]
+Options:
+  -f, --filter      Report filtered (e.g. fastest) benchmark after suite runs
+                                   [choices: "fastest", "slowest", "successful"]
+  -d, --delay       The delay between test cycles (secs)                [number]
+  -x, --maxTime     The maximum time a benchmark is allowed to run before
+                    finishing (secs)                                    [number]
+  -s, --minSamples  The minimum sample size required to perform statistical
+                    analysis                                            [number]
+  -n, --minTime     The time needed to reduce the percent uncertainty of
+                    measurement to 1% (secs)                            [number]
+  -g, --grep        Run only tests matching <pattern>                   [string]
+  -p, --platform    Print platform information                         [boolean]
+  -t, --test        Do a dry run without executing benchmarks          [boolean]
+  --help            Show help                                          [boolean]
+  -r, --recursive                                     [boolean] [default: false]
+----
+
+
+.-R, -reporter <name>
+The --reporter option allows you to specify the reporter that will be used, defaulting to "console". You may also use third-party reporters installed with `npm install`.
+
+.-g, --grep <pattern>
+The --grep option will trigger `bench-runner` to only run tests
+whose paths match the given pattern which is internally compiled to a `RegExp`.
+
+In the snippet below:
+
+* "es5" will match only `:compare:classes:es5` and `:compare:arrow functions:es5`,
+* "arrow" will match `:compare:arrow functions:es5` and `:compare:arrow functions:es6`
+
+[source,javascript]
+----
+suite( 'compare', () => {
+  suite( 'classes', () => {
+    bench( 'es5', () => new ES5());
+    bench( 'es6', () => new ES6());
+  } );
+
+  suite( 'arrow functions', () => {
+    bench( 'es5', es5fn );
+    bench( 'es6', es6fn );
+  } );
+} );
+----
+
+.-t, --test
+Enables dry-run mode which cycles through the suites and benchmarks selected by
+other settings such as `grep` without actually executing the benchmark code.
+This mode can be useful to verify the selection by a particular grep filter.
+
+.--delay, --maxTime, --minSamples, --minTime
+These options are passed directly to `benchmark.js`
+
+
+
+== Hooks
+
+Hooks must be synchronous since they are called by `benchmark.js` which
+does not support async hooks at this time. Also, `setup` and`teardown`
+are compiled into the test function. Including either may place
+restrictions on the scoping/availability of variables in the test
+function (see `benchmark.js` docs for more information).
+
+[source,javascript]
+----
+suite('hooks', function() {
+
+  before(function() {
+    // runs before all tests in this suite
+  });
+
+  after(function() {
+    // runs after all tests in this suite
+  });
+
+  beforeEach(function() {
+    // runs before each benchmark test function in this suite
+  });
+
+  afterEach(function() {
+    // runs after each benchmark test function in this suite
+  });
+
+  bench('name', {setup: function(){
+    //setup is compiled into the test function and runs before each cycle of the test
+  }})
+
+  bench('name', {teardown: function(){
+    //teardown is compiled into the test function and runs after each cycle of the test
+  }}, testFn)
+
+  //benchmarks here...
+});
+----
+
+
+== Reporters
+
+=== console
+The default reporter. Pretty prints results via `console.log`.
+
+=== json
+Outputs a single large JSON object when the tests have completed.
