@@ -13,7 +13,7 @@ endif::[]
 
 = benchr
 
-http://www.benchmarkjs.com[benchmark.js] runner for Node.js like
+TIP: http://www.benchmarkjs.com[benchmark.js] runner for Node.js like
 http://mochajs.org/[mocha].
 
 == Getting Started
