@@ -185,10 +185,10 @@ Options:
 ----
 
 
-.-R, -reporter <name>
+**-R, -reporter <name>** +
 The --reporter option allows you to specify the reporter that will be used, defaulting to "console". You may also use third-party reporters installed with `npm install`.
 
-.-g, --grep <pattern>
+**-g, --grep <pattern>** +
 The --grep option will trigger `bench-runner` to only run tests
 whose paths match the given pattern which is internally compiled to a `RegExp`.
 
@@ -212,14 +212,13 @@ suite( 'compare', () => {
 } );
 ----
 
-.-t, --test
+**-t, --test** +
 Enables dry-run mode which cycles through the suites and benchmarks selected by
 other settings such as `grep` without actually executing the benchmark code.
 This mode can be useful to verify the selection by a particular grep filter.
 
-.--delay, --maxTime, --minSamples, --minTime
+**--delay, --maxTime, --minSamples, --minTime** +
 These options are passed directly to `benchmark.js`
-
 
 
 == Hooks
