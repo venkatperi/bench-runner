@@ -25,6 +25,7 @@
     "yargs": "^8.0.2"
   },
   "devDependencies": {
+    "coffee-script": "^1.12.7",
     "mocha": "^3.4.2"
   }
 }
